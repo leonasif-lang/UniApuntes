@@ -1,14 +1,22 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, borderRadius, shadows, spacing } from '../styles/theme';
+import { typography, borderRadius, shadows, spacing } from '../styles/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function PublicationCard({ publication, onPress }) {
-  const isGratis = publication.precio.toUpperCase() === 'GRATIS';
+  const { colors, isDarkMode } = useTheme();
+  const isGratis = (publication.precio || 'GRATIS').toUpperCase() === 'GRATIS';
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.cardBg,
+          borderColor: colors.border,
+        },
+      ]}
       onPress={onPress}
       activeOpacity={0.7}
       accessibilityRole="button"
@@ -16,31 +24,90 @@ export default function PublicationCard({ publication, onPress }) {
     >
       <View style={styles.headerRow}>
         <View style={styles.badgeRow}>
-          <View style={styles.typeBadge}>
-            <Text style={styles.typeText}>{publication.tipo}</Text>
+          <View
+            style={[
+              styles.typeBadge,
+              { backgroundColor: isDarkMode ? '#1E3A8A' : '#EBF2FF' },
+            ]}
+          >
+            <Text
+              style={[
+                styles.typeText,
+                { color: isDarkMode ? '#93C5FD' : colors.primary },
+              ]}
+            >
+              {publication.tipo}
+            </Text>
           </View>
-          <View style={styles.subjectBadge}>
-            <Text style={styles.subjectText}>{publication.materia}</Text>
+          <View
+            style={[
+              styles.subjectBadge,
+              { backgroundColor: isDarkMode ? '#334155' : colors.tagBg },
+            ]}
+          >
+            <Text style={[styles.subjectText, { color: colors.textSecondary }]}>
+              {publication.materia}
+            </Text>
           </View>
         </View>
-        <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={14} color={colors.star} />
-          <Text style={styles.ratingText}>{publication.rating}</Text>
+        <View
+          style={[
+            styles.ratingContainer,
+            { backgroundColor: isDarkMode ? '#78350F' : '#FEF3C7' },
+          ]}
+        >
+          <Ionicons name="star" size={14} color={isDarkMode ? '#FDE047' : colors.star} />
+          <Text
+            style={[
+              styles.ratingText,
+              { color: isDarkMode ? '#FEF08A' : '#92400E' },
+            ]}
+          >
+            {publication.rating}
+          </Text>
         </View>
       </View>
 
-      <Text style={styles.title} numberOfLines={2}>
+      <Text
+        style={[styles.title, { color: colors.textPrimary }]}
+        numberOfLines={2}
+      >
         {publication.titulo}
       </Text>
 
-      <View style={styles.footerRow}>
+      <View
+        style={[
+          styles.footerRow,
+          { borderTopColor: isDarkMode ? '#334155' : '#F0F2F5' },
+        ]}
+      >
         <View style={styles.authorContainer}>
-          <Ionicons name="person-circle-outline" size={16} color={colors.textSecondary} />
-          <Text style={styles.authorText}>{publication.autor}</Text>
+          <Ionicons
+            name="person-circle-outline"
+            size={16}
+            color={colors.textSecondary}
+          />
+          <Text style={[styles.authorText, { color: colors.textSecondary }]}>
+            {publication.autor}
+          </Text>
         </View>
 
-        <View style={[styles.priceBadge, isGratis ? styles.priceGratis : styles.pricePaid]}>
-          <Text style={[styles.priceText, isGratis ? styles.priceTextGratis : styles.priceTextPaid]}>
+        <View
+          style={[
+            styles.priceBadge,
+            isGratis
+              ? isDarkMode
+                ? styles.priceGratisDark
+                : styles.priceGratis
+              : styles.pricePaid,
+          ]}
+        >
+          <Text
+            style={[
+              styles.priceText,
+              isGratis ? styles.priceTextGratis : styles.priceTextPaid,
+            ]}
+          >
             {publication.precio}
           </Text>
         </View>
@@ -51,12 +118,10 @@ export default function PublicationCard({ publication, onPress }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.cardBg,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
     ...shadows.card,
   },
   headerRow: {
@@ -73,24 +138,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   typeBadge: {
-    backgroundColor: '#EBF2FF',
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: borderRadius.sm,
   },
   typeText: {
-    color: colors.primary,
     fontSize: typography.sizes.xs,
     fontWeight: typography.weights.semibold,
   },
   subjectBadge: {
-    backgroundColor: colors.tagBg,
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: borderRadius.sm,
   },
   subjectText: {
-    color: colors.textSecondary,
     fontSize: typography.sizes.xs,
     fontWeight: typography.weights.medium,
   },
@@ -98,20 +159,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#FEF3C7',
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: borderRadius.sm,
   },
   ratingText: {
-    color: '#92400E',
     fontSize: typography.sizes.xs,
     fontWeight: typography.weights.bold,
   },
   title: {
     fontSize: typography.sizes.lg,
     fontWeight: typography.weights.bold,
-    color: colors.textPrimary,
     marginBottom: 12,
     lineHeight: 22,
   },
@@ -121,7 +179,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#F0F2F5',
   },
   authorContainer: {
     flexDirection: 'row',
@@ -130,7 +187,6 @@ const styles = StyleSheet.create({
   },
   authorText: {
     fontSize: typography.sizes.sm,
-    color: colors.textSecondary,
     fontWeight: typography.weights.medium,
   },
   priceBadge: {
@@ -141,6 +197,9 @@ const styles = StyleSheet.create({
   priceGratis: {
     backgroundColor: '#DCFCE7',
   },
+  priceGratisDark: {
+    backgroundColor: '#064E3B',
+  },
   pricePaid: {
     backgroundColor: '#EEF2FF',
   },
@@ -149,9 +208,9 @@ const styles = StyleSheet.create({
     fontWeight: typography.weights.bold,
   },
   priceTextGratis: {
-    color: colors.green,
+    color: '#10B981',
   },
   priceTextPaid: {
-    color: colors.primary,
+    color: '#3B82F6',
   },
 });

@@ -7,17 +7,24 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
-  Alert,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles/theme';
 import PrimaryButton from '../components/PrimaryButton';
+import DarkModeButton from '../components/DarkModeButton';
+import { useFavorites } from '../context/FavoritesContext';
+import { useMessages } from '../context/MessagesContext';
+import { useTheme } from '../context/ThemeContext';
 
-export default function DetailScreen({ publication, onBack }) {
-  // Estado local para la función Guardar / Favoritos
-  const [isSaved, setIsSaved] = useState(false);
-  // Estado local para feedback visual de Contactar
-  const [contactFeedback, setContactFeedback] = useState(false);
+export default function DetailScreen({ publication, onBack, onOpenChat }) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { startConversation } = useMessages();
+  const { colors, isDarkMode } = useTheme();
+
+  // Modal para la confirmación de contacto
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [activeConversation, setActiveConversation] = useState(null);
 
   // Datos de respaldo por si no se reciben props
   const item = publication || {
@@ -32,36 +39,34 @@ export default function DetailScreen({ publication, onBack }) {
       'Material de apoyo para estudiantes que cursan Programación I. Incluye conceptos fundamentales, ejemplos y contenidos principales de la materia.',
   };
 
-  const isGratis = item.precio.toUpperCase() === 'GRATIS';
+  const isSaved = isFavorite(item.id);
 
   const handleToggleSave = () => {
-    setIsSaved((prev) => !prev);
+    toggleFavorite(item);
   };
 
   const handleContact = () => {
-    setContactFeedback(true);
-    // Mostrar Alerta estándar nativa
-    Alert.alert(
-      'Mensaje de UniApuntes',
-      'Solicitud de contacto enviada.',
-      [
-        {
-          text: 'Aceptar',
-          onPress: () => {
-            // Ocultar banner tras aceptar
-            setTimeout(() => setContactFeedback(false), 2500);
-          },
-        },
-      ]
-    );
+    const conv = startConversation(item);
+    setActiveConversation(conv);
+    setShowContactModal(true);
+  };
+
+  const handleGoToChat = () => {
+    setShowContactModal(false);
+    if (onOpenChat && activeConversation) {
+      onOpenChat(activeConversation);
+    }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.cardBg}
+      />
 
-      {/* Encabezado con botón Volver */}
-      <View style={styles.header}>
+      {/* Encabezado con botón Volver y DarkModeButton */}
+      <View style={[styles.header, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={onBack}
@@ -70,56 +75,55 @@ export default function DetailScreen({ publication, onBack }) {
           accessibilityLabel="Volver a la pantalla anterior"
         >
           <Ionicons name="arrow-back" size={22} color={colors.primary} />
-          <Text style={styles.backButtonText}>← Volver</Text>
+          <Text style={[styles.backButtonText, { color: colors.primary }]}>← Volver</Text>
         </TouchableOpacity>
+        <DarkModeButton compact={true} />
       </View>
 
       <ScrollView
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors.background }]}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Banner de feedback si se envió contacto */}
-        {contactFeedback && (
-          <View style={styles.successBanner}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.green} />
-            <Text style={styles.successBannerText}>Solicitud de contacto enviada.</Text>
-          </View>
-        )}
-
         {/* Tarjeta Principal del Recurso */}
-        <View style={styles.mainCard}>
+        <View style={[styles.mainCard, { backgroundColor: colors.cardBg, borderColor: colors.border }]}>
           {/* Etiquetas superiores */}
           <View style={styles.tagRow}>
-            <View style={styles.typeBadge}>
-              <Text style={styles.typeText}>{item.tipo}</Text>
+            <View style={[styles.typeBadge, { backgroundColor: isDarkMode ? '#1E3A8A' : '#EBF2FF' }]}>
+              <Text style={[styles.typeText, { color: isDarkMode ? '#93C5FD' : colors.primary }]}>
+                {item.tipo}
+              </Text>
             </View>
-            <View style={styles.subjectBadge}>
-              <Text style={styles.subjectText}>{item.materia}</Text>
+            <View style={[styles.subjectBadge, { backgroundColor: isDarkMode ? '#334155' : colors.tagBg }]}>
+              <Text style={[styles.subjectText, { color: colors.textSecondary }]}>
+                {item.materia}
+              </Text>
             </View>
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={15} color={colors.star} />
-              <Text style={styles.ratingText}>{item.rating} ⭐</Text>
+            <View style={[styles.ratingBadge, { backgroundColor: isDarkMode ? '#78350F' : '#FEF3C7' }]}>
+              <Ionicons name="star" size={15} color={isDarkMode ? '#FDE047' : colors.star} />
+              <Text style={[styles.ratingText, { color: isDarkMode ? '#FEF08A' : '#92400E' }]}>
+                {item.rating} ⭐
+              </Text>
             </View>
           </View>
 
           {/* Título de la publicación */}
-          <Text style={styles.title}>{item.titulo}</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>{item.titulo}</Text>
 
           {/* Sección del Autor */}
-          <View style={styles.authorCard}>
-            <View style={styles.authorAvatar}>
+          <View style={[styles.authorCard, { backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }]}>
+            <View style={[styles.authorAvatar, { backgroundColor: isDarkMode ? '#334155' : '#EEF2FF' }]}>
               <Ionicons name="person" size={20} color={colors.primary} />
             </View>
             <View style={styles.authorDetails}>
-              <Text style={styles.authorLabel}>Publicado por</Text>
-              <Text style={styles.authorName}>{item.autor}</Text>
+              <Text style={[styles.authorLabel, { color: colors.textSecondary }]}>Publicado por</Text>
+              <Text style={[styles.authorName, { color: colors.textPrimary }]}>{item.autor}</Text>
             </View>
           </View>
 
           {/* Sección de Acceso Gratuito */}
-          <View style={styles.priceContainer}>
-            <Text style={styles.priceLabel}>Acceso:</Text>
+          <View style={[styles.priceContainer, { borderTopColor: isDarkMode ? '#334155' : '#E5E7EB' }]}>
+            <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Acceso:</Text>
             <Text style={[styles.priceValue, styles.priceGratis]}>
               GRATIS
             </Text>
@@ -153,7 +157,7 @@ export default function DetailScreen({ publication, onBack }) {
             onPress={handleContact}
           />
 
-          {/* Botón GUARDAR con Toggle */}
+          {/* Botón GUARDAR con Toggle Persistente */}
           <PrimaryButton
             title={isSaved ? '♥ GUARDADO' : '♡ GUARDAR'}
             variant={isSaved ? 'saved' : 'save'}
@@ -168,6 +172,44 @@ export default function DetailScreen({ publication, onBack }) {
           />
         </View>
       </ScrollView>
+
+      {/* Modal de Contacto y Redirección a Chat */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showContactModal}
+        onRequestClose={() => setShowContactModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalIconCircle}>
+              <Ionicons name="chatbubbles-outline" size={32} color={colors.primary} />
+            </View>
+            <Text style={styles.modalTitle}>¡Solicitud Enviada!</Text>
+            <Text style={styles.modalMessage}>
+              Se inició la consulta con <Text style={{ fontWeight: 'bold' }}>{item.autor}</Text> sobre "{item.titulo}". ¿Deseás abrir el chat directo ahora?
+            </Text>
+
+            <View style={styles.modalButtonsRow}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowContactModal(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.modalCancelText}>Seguir explorando</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalConfirmBtn}
+                onPress={handleGoToChat}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.modalConfirmText}>Abrir Chat</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -203,22 +245,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
-  },
-  successBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#DCFCE7',
-    borderColor: '#86EFAC',
-    borderWidth: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    gap: 8,
-  },
-  successBannerText: {
-    color: '#166534',
-    fontSize: typography.sizes.sm,
-    fontWeight: typography.weights.semibold,
   },
   mainCard: {
     backgroundColor: colors.white,
@@ -326,9 +352,6 @@ const styles = StyleSheet.create({
   priceGratis: {
     color: colors.green,
   },
-  pricePaid: {
-    color: colors.primary,
-  },
   divider: {
     height: 1,
     backgroundColor: colors.border,
@@ -366,5 +389,73 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     gap: 12,
     marginTop: spacing.xs,
+  },
+  // Modal de Contacto
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(11, 31, 75, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    padding: 24,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 340,
+    ...shadows.strong,
+  },
+  modalIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#EEF2FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  modalMessage: {
+    fontSize: typography.sizes.sm,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  modalButtonsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  modalCancelBtn: {
+    flex: 1,
+    backgroundColor: colors.tagBg,
+    paddingVertical: 12,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    color: colors.textSecondary,
+    fontWeight: typography.weights.semibold,
+    fontSize: typography.sizes.xs,
+  },
+  modalConfirmBtn: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+  },
+  modalConfirmText: {
+    color: colors.white,
+    fontWeight: typography.weights.bold,
+    fontSize: typography.sizes.sm,
   },
 });

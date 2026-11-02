@@ -9,13 +9,17 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, spacing, borderRadius } from '../styles/theme';
+import { typography, spacing, borderRadius } from '../styles/theme';
 import SearchBar from '../components/SearchBar';
 import PublicationCard from '../components/PublicationCard';
 import FilterButton from '../components/FilterButton';
-import publications from '../data/publications';
+import DarkModeButton from '../components/DarkModeButton';
+import { usePublications } from '../context/PublicationsContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function ResultsScreen({ query = 'Programación', onBack, onNavigate }) {
+  const { publications } = usePublications();
+  const { colors, isDarkMode } = useTheme();
   const [currentQuery, setCurrentQuery] = useState(query || 'Programación');
   const [activeFilter, setActiveFilter] = useState(null);
 
@@ -50,11 +54,14 @@ export default function ResultsScreen({ query = 'Programación', onBack, onNavig
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.cardBg}
+      />
 
-      {/* Barra superior con botón volver */}
-      <View style={styles.header}>
+      {/* Barra superior con botón volver y Modo Oscuro */}
+      <View style={[styles.header, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={onBack}
@@ -62,14 +69,14 @@ export default function ResultsScreen({ query = 'Programación', onBack, onNavig
           accessibilityRole="button"
           accessibilityLabel="Volver a la pantalla anterior"
         >
-          <Ionicons name="arrow-back" size={24} color={colors.primaryDark} />
+          <Ionicons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Resultados</Text>
-        <View style={{ width: 24 }} />
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Resultados</Text>
+        <DarkModeButton compact={true} />
       </View>
 
       <ScrollView
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors.background }]}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >

@@ -23,7 +23,7 @@ export const publications = [
     id: 3,
     titulo: "Resumen de Matemática Discreta",
     tipo: "Resúmenes",
-    materia: "Matemática",
+    materia: "Matemática Discreta",
     autor: "Maycol",
     rating: 4.7,
     precio: "GRATIS",
@@ -37,7 +37,37 @@ export const publications = [
     autor: "Tomás",
     rating: 4.9,
     precio: "GRATIS",
-    descripcion: "Curso introductorio sobre bases de datos."
+    descripcion: "Curso introductorio sobre bases de datos relacionales y SQL."
+  },
+  {
+    id: 5,
+    titulo: "Resumen de Psicología General y del Desarrollo",
+    tipo: "Resúmenes",
+    materia: "Psicología",
+    autor: "Camila",
+    rating: 4.8,
+    precio: "GRATIS",
+    descripcion: "Resumen completo de las principales corrientes psicológicas (conductismo, psicoanálisis, psicología cognitiva) y etapas evolutivas."
+  },
+  {
+    id: 6,
+    titulo: "Guía Clínica de Enfermería y Farmacología",
+    tipo: "Apuntes",
+    materia: "Enfermería",
+    autor: "Lucas",
+    rating: 4.9,
+    precio: "GRATIS",
+    descripcion: "Protocolos de signos vitales, administración segura de medicamentos, bioseguridad y cuidados básicos de enfermería."
+  },
+  {
+    id: 7,
+    titulo: "Manual de Vegetación y Diseño de Paisaje",
+    tipo: "Cursos",
+    materia: "Diseño de Paisaje",
+    autor: "Valeria",
+    rating: 5.0,
+    precio: "GRATIS",
+    descripcion: "Guía de especies autóctonas, zonificación de áreas verdes, diseño sustentable de jardines y representación gráfica de proyectos de paisaje."
   }
 ];
 

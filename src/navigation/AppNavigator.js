@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert, Modal, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Modal, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import ResultsScreen from '../screens/ResultsScreen';
 import DetailScreen from '../screens/DetailScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import LoginScreen from '../screens/LoginScreen';
+import PublishScreen from '../screens/PublishScreen';
+import MessagesScreen from '../screens/MessagesScreen';
+import ChatScreen from '../screens/ChatScreen';
 import BottomNavigation from '../components/BottomNavigation';
 import { colors, typography, borderRadius, shadows } from '../styles/theme';
+import { useAuth } from '../context/AuthContext';
 
 export default function AppNavigator() {
+  const { isAuthenticated } = useAuth();
+
   // Pila de navegación con historial para soportar "Volver"
   const [history, setHistory] = useState([{ screen: 'Home', params: {} }]);
+
+  // Cuando cambia el estado de autenticación (ej: al iniciar sesión), reseteamos el historial a Home
+  useEffect(() => {
+    if (isAuthenticated) {
+      setHistory([{ screen: 'Home', params: {} }]);
+    }
+  }, [isAuthenticated]);
+
   // Modal informativo para funcionalidades de etapas posteriores
   const [modalVisible, setModalVisible] = useState(false);
   const [modalFeatureName, setModalFeatureName] = useState('');
@@ -38,10 +54,30 @@ export default function AppNavigator() {
     } else if (tabName === 'Results') {
       // Si va a Buscar desde la barra inferior
       setHistory((prev) => {
-        // Evitar duplicar consecutivamente si ya estamos en Results
         const last = prev[prev.length - 1];
         if (last && last.screen === 'Results') return prev;
         return [...prev, { screen: 'Results', params: { query: 'Programación' } }];
+      });
+    } else if (tabName === 'Publish') {
+      // Si va a Publicar desde la barra inferior
+      setHistory((prev) => {
+        const last = prev[prev.length - 1];
+        if (last && last.screen === 'Publish') return prev;
+        return [...prev, { screen: 'Publish', params: {} }];
+      });
+    } else if (tabName === 'Messages') {
+      // Si va a Mensajes desde la barra inferior
+      setHistory((prev) => {
+        const last = prev[prev.length - 1];
+        if (last && last.screen === 'Messages') return prev;
+        return [...prev, { screen: 'Messages', params: {} }];
+      });
+    } else if (tabName === 'Profile') {
+      // Si va a Perfil desde la barra inferior
+      setHistory((prev) => {
+        const last = prev[prev.length - 1];
+        if (last && last.screen === 'Profile') return prev;
+        return [...prev, { screen: 'Profile', params: {} }];
       });
     }
   };
@@ -50,6 +86,11 @@ export default function AppNavigator() {
     setModalFeatureName(featureName);
     setModalVisible(true);
   };
+
+  // Si el usuario no está autenticado, mostramos la pantalla de Login
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
 
   return (
     <View style={styles.rootContainer}>
@@ -71,11 +112,39 @@ export default function AppNavigator() {
           <DetailScreen
             publication={currentParams.publication}
             onBack={goBack}
+            onOpenChat={(conv) => navigate('Chat', { conversation: conv })}
+          />
+        )}
+
+        {currentScreen === 'Publish' && (
+          <PublishScreen
+            onBack={history.length > 1 ? goBack : () => handleTabNavigate('Home')}
+            onPublishSuccess={() => handleTabNavigate('Home')}
+          />
+        )}
+
+        {currentScreen === 'Messages' && (
+          <MessagesScreen
+            onOpenChat={(conv) => navigate('Chat', { conversation: conv })}
+          />
+        )}
+
+        {currentScreen === 'Chat' && (
+          <ChatScreen
+            conversation={currentParams.conversation}
+            onBack={goBack}
+          />
+        )}
+
+        {currentScreen === 'Profile' && (
+          <ProfileScreen
+            onBack={history.length > 1 ? goBack : null}
+            onSelectPublication={(pub) => navigate('Detail', { publication: pub })}
           />
         )}
       </View>
 
-      {/* Barra de navegación inferior siempre visible */}
+      {/* Barra de navegación inferior siempre visible en el flujo autenticado */}
       <BottomNavigation
         currentScreen={currentScreen}
         onNavigate={handleTabNavigate}

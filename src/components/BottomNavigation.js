@@ -1,9 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, shadows, spacing } from '../styles/theme';
+import { typography, shadows, spacing } from '../styles/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function BottomNavigation({ currentScreen, onNavigate, onFeatureUnavailable }) {
+  const { colors, isDarkMode } = useTheme();
+
   const tabs = [
     {
       key: 'Home',
@@ -24,21 +27,21 @@ export default function BottomNavigation({ currentScreen, onNavigate, onFeatureU
       label: 'Publicar',
       iconActive: 'add-circle',
       iconInactive: 'add-circle-outline',
-      available: false,
+      available: true,
     },
     {
       key: 'Messages',
       label: 'Mensajes',
       iconActive: 'chatbubble',
       iconInactive: 'chatbubble-outline',
-      available: false,
+      available: true,
     },
     {
       key: 'Profile',
       label: 'Perfil',
       iconActive: 'person',
       iconInactive: 'person-outline',
-      available: false,
+      available: true,
     },
   ];
 
@@ -60,11 +63,25 @@ export default function BottomNavigation({ currentScreen, onNavigate, onFeatureU
       onNavigate('Home');
     } else if (tab.key === 'Results') {
       onNavigate('Results', { query: '' });
+    } else if (tab.key === 'Publish') {
+      onNavigate('Publish');
+    } else if (tab.key === 'Messages') {
+      onNavigate('Messages');
+    } else if (tab.key === 'Profile') {
+      onNavigate('Profile');
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDarkMode ? '#0F172A' : '#FFFFFF',
+          borderTopColor: isDarkMode ? '#1E293B' : '#E5E7EB',
+        },
+      ]}
+    >
       {tabs.map((tab) => {
         const isActive = currentScreen === tab.key;
         const iconName = isActive ? tab.iconActive : tab.iconInactive;
@@ -87,7 +104,8 @@ export default function BottomNavigation({ currentScreen, onNavigate, onFeatureU
             <Text
               style={[
                 styles.tabLabel,
-                isActive ? styles.labelActive : styles.labelInactive,
+                { color: isActive ? colors.primary : colors.textSecondary },
+                isActive && styles.labelActive,
               ]}
             >
               {tab.label}
@@ -102,9 +120,7 @@ export default function BottomNavigation({ currentScreen, onNavigate, onFeatureU
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: colors.white,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
     paddingVertical: spacing.sm,
     paddingBottom: Platform.OS === 'ios' ? 24 : spacing.sm,
     justifyContent: 'space-around',
@@ -123,10 +139,6 @@ const styles = StyleSheet.create({
     fontWeight: typography.weights.medium,
   },
   labelActive: {
-    color: colors.primary,
     fontWeight: typography.weights.bold,
-  },
-  labelInactive: {
-    color: colors.textSecondary,
   },
 });

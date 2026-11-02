@@ -4,7 +4,7 @@
     "slug": "uniapuntes",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.jpg",
     "userInterfaceStyle": "light",
     "primaryColor": "#123B8E",
     "ios": {
@@ -12,14 +12,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#123B8E",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#123B8E"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/logo.jpg"
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

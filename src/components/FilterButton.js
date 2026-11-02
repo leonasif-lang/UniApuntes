@@ -1,12 +1,25 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, borderRadius, spacing } from '../styles/theme';
+import { typography, borderRadius, spacing } from '../styles/theme';
+import { useTheme } from '../context/ThemeContext';
 
 export default function FilterButton({ label, icon, isSelected, onPress }) {
+  const { colors, isDarkMode } = useTheme();
+
   return (
     <TouchableOpacity
-      style={[styles.button, isSelected && styles.buttonSelected]}
+      style={[
+        styles.button,
+        {
+          backgroundColor: isSelected
+            ? colors.primary
+            : isDarkMode
+            ? '#1E293B'
+            : '#FFFFFF',
+          borderColor: isSelected ? colors.primary : colors.border,
+        },
+      ]}
       onPress={onPress}
       activeOpacity={0.7}
       accessibilityRole="button"
@@ -16,15 +29,23 @@ export default function FilterButton({ label, icon, isSelected, onPress }) {
         <Ionicons
           name={icon}
           size={14}
-          color={isSelected ? colors.white : colors.textSecondary}
+          color={isSelected ? '#FFFFFF' : colors.textSecondary}
           style={styles.icon}
         />
       ) : null}
-      <Text style={[styles.text, isSelected && styles.textSelected]}>{label}</Text>
+      <Text
+        style={[
+          styles.text,
+          { color: isSelected ? '#FFFFFF' : colors.textPrimary },
+          isSelected && styles.textSelected,
+        ]}
+      >
+        {label}
+      </Text>
       <Ionicons
         name="chevron-down"
         size={12}
-        color={isSelected ? colors.white : colors.textSecondary}
+        color={isSelected ? '#FFFFFF' : colors.textSecondary}
         style={styles.chevron}
       />
     </TouchableOpacity>
@@ -35,17 +56,11 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: borderRadius.full,
     paddingVertical: 6,
     paddingHorizontal: 12,
     marginRight: spacing.sm,
-  },
-  buttonSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
   icon: {
     marginRight: 4,
@@ -55,11 +70,9 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: typography.sizes.sm,
-    color: colors.textPrimary,
     fontWeight: typography.weights.medium,
   },
   textSelected: {
-    color: colors.white,
     fontWeight: typography.weights.semibold,
   },
 });
