@@ -58,8 +58,15 @@
 | **TC-PROF-01** | Perfil | Visualización de datos académicos (Carrera, UNP, Cátedra, Docente). | Alta | ✅ APROBADO |
 | **TC-PROF-02** | Perfil / Fav | Contador y lista de "Mis Apuntes Guardados" en el perfil. | Alta | ✅ APROBADO |
 | **TC-PROF-03** | Perfil / Fav | Acceso directo a la publicación desde la lista de guardados. | Media | ✅ APROBADO |
-| **TC-PERS-01** | Persistencia | Persistencia de publicaciones nuevas mediante AsyncStorage. | Alta | ✅ APROBADO |
+| **TC-PERS-01** | Persistencia | Persistencia de publicaciones nuevas mediante AsyncStorage y Cloud Firestore. | Alta | ✅ APROBADO |
 | **TC-PERS-02** | Persistencia | Persistencia de favoritos guardados tras recargar la aplicación. | Alta | ✅ APROBADO |
+| **TC-THEME-01** | UI / Tema | Alternancia fluida entre Modo Claro y Modo Oscuro con persistencia en storage. | Alta | ✅ APROBADO |
+| **TC-SUBJ-01** | Catálogo / Filtro | Búsqueda y filtrado de nuevas materias: Psicología, Enfermería y Diseño de Paisaje. | Alta | ✅ APROBADO |
+| **TC-LEGAL-01** | Legal / Normativa | Despliegue interactivo de Términos y Condiciones de uso universitario. | Media | ✅ APROBADO |
+| **TC-LEGAL-02** | Legal / Disclaimer | Lectura del Disclaimer y deslinde de responsabilidad pedagógica UNP. | Media | ✅ APROBADO |
+| **TC-ONBOARD-01** | Onboarding | Carrusel interactivo de bienvenida con reseña y pilares de la plataforma. | Alta | ✅ APROBADO |
+| **TC-RECOV-01** | Autenticación | Recuperación de cuenta institucional y restablecimiento de contraseña vía Firebase. | Alta | ✅ APROBADO |
+| **TC-BACKEND-01** | Backend / Cloud | Conexión en tiempo real a Cloud Firestore y Firebase Authentication. | Alta | ✅ APROBADO |
 
 ---
 

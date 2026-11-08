@@ -19,7 +19,8 @@
       "favicon": "./assets/logo.jpg"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-status-bar"
     ]
   }
 }

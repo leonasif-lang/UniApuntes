@@ -14,6 +14,8 @@ import SearchBar from '../components/SearchBar';
 import CategoryCard from '../components/CategoryCard';
 import PublicationCard from '../components/PublicationCard';
 import DarkModeButton from '../components/DarkModeButton';
+import OnboardingModal from '../components/OnboardingModal';
+import DisclaimerModal from '../components/DisclaimerModal';
 import { useAuth } from '../context/AuthContext';
 import { usePublications } from '../context/PublicationsContext';
 import { useTheme } from '../context/ThemeContext';
@@ -23,6 +25,8 @@ export default function HomeScreen({ onNavigate }) {
   const { publications } = usePublications();
   const { isDarkMode, colors } = useTheme();
   const [searchText, setSearchText] = useState('');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   const categories = [
     { id: '1', title: 'Apuntes', icon: '📚' },
@@ -108,12 +112,43 @@ export default function HomeScreen({ onNavigate }) {
         </View>
 
         <View style={styles.greetingSection}>
+          <View style={[styles.institutionHeaderPill, { backgroundColor: isDarkMode ? '#1E3A8A' : '#EFF6FF' }]}>
+            <Ionicons name="school" size={12} color={colors.primary} />
+            <Text style={[styles.institutionHeaderPillText, { color: colors.primary }]}>
+              UNP Pilar • Ciclo Académico 2026
+            </Text>
+          </View>
+
           <Text style={[styles.greeting, { color: colors.textPrimary }]}>
             Hola, {user?.nombre || 'Leonardo'} 👋
           </Text>
           <Text style={[styles.greetingSubtext, { color: colors.textSecondary }]}>
             ¿Qué material universitario necesitás hoy?
           </Text>
+
+          {/* Banner de Bienvenida / Reseña de la App */}
+          <TouchableOpacity
+            style={[styles.welcomeBanner, { backgroundColor: isDarkMode ? '#1E293B' : '#EEF4FF', borderColor: isDarkMode ? '#334155' : '#D9E6FF' }]}
+            onPress={() => setShowOnboarding(true)}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Ver reseña de qué trata la app"
+          >
+            <View style={styles.welcomeBannerLeft}>
+              <View style={[styles.sparkleCircle, { backgroundColor: isDarkMode ? '#0F172A' : '#FFFFFF' }]}>
+                <Ionicons name="sparkles" size={16} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.welcomeBannerTitle, { color: colors.textPrimary }]}>
+                  ¿Cómo funciona UniApuntes?
+                </Text>
+                <Text style={[styles.welcomeBannerSubtitle, { color: colors.textSecondary }]}>
+                  Tocá para ver la reseña y pautas de la comunidad
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* Barra de Búsqueda */}
@@ -191,6 +226,10 @@ export default function HomeScreen({ onNavigate }) {
           ))}
         </View>
       </ScrollView>
+
+      {/* Modales de Onboarding y Disclaimer */}
+      <OnboardingModal visible={showOnboarding} onFinish={() => setShowOnboarding(false)} />
+      <DisclaimerModal visible={showDisclaimer} onClose={() => setShowDisclaimer(false)} />
     </SafeAreaView>
   );
 }
@@ -263,6 +302,52 @@ const styles = StyleSheet.create({
   },
   greetingSection: {
     marginBottom: spacing.sm,
+  },
+  institutionHeaderPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: borderRadius.full,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  institutionHeaderPillText: {
+    fontSize: 11,
+    fontWeight: typography.weights.semibold,
+  },
+  welcomeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    marginTop: 10,
+    ...shadows.small,
+  },
+  welcomeBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  sparkleCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  welcomeBannerTitle: {
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.bold,
+  },
+  welcomeBannerSubtitle: {
+    fontSize: 11,
+    marginTop: 2,
   },
   greeting: {
     fontSize: typography.sizes.xxl,

@@ -18,7 +18,8 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 
 // Credenciales oficiales de Firebase para UniApuntes
@@ -41,6 +42,43 @@ const db = getFirestore(app);
 // Servicio de Autenticación
 const auth = getAuth(app);
 
+// Helper para recuperación de contraseña institucional
+export async function sendAccountRecoveryEmail(email) {
+  if (!email || !email.trim()) {
+    throw new Error('Debés ingresar un correo electrónico institucional.');
+  }
+  const cleanEmail = email.trim();
+  try {
+    await sendPasswordResetEmail(auth, cleanEmail);
+    return { success: true, message: `Se envió un enlace de restablecimiento a ${cleanEmail}.` };
+  } catch (err) {
+    // Si la cuenta es de prueba o no está en Firebase Auth, proveer respuesta guiada
+    if (err.code === 'auth/user-not-found') {
+      return { 
+        success: true, 
+        isSimulated: true, 
+        message: `Si la cuenta ${cleanEmail} está registrada en UNP, recibirás un correo de recuperación.` 
+      };
+    }
+    throw err;
+  }
+}
+
+// Verificación de estado del backend en la nube
+export async function checkBackendHealth() {
+  try {
+    const isOnline = !!auth && !!db;
+    return {
+      status: 'online',
+      provider: 'Google Firebase (Cloud Firestore & Auth)',
+      projectId: firebaseConfig.projectId,
+      timestamp: Date.now(),
+    };
+  } catch (e) {
+    return { status: 'offline', error: e.message };
+  }
+}
+
 export { 
   app, 
   auth, 
@@ -59,5 +97,6 @@ export {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 };

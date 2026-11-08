@@ -9,7 +9,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { typography, spacing, borderRadius } from '../styles/theme';
+import { colors, typography, spacing, borderRadius } from '../styles/theme';
 import SearchBar from '../components/SearchBar';
 import PublicationCard from '../components/PublicationCard';
 import FilterButton from '../components/FilterButton';

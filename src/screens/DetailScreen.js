@@ -121,6 +121,16 @@ export default function DetailScreen({ publication, onBack, onOpenChat }) {
             </View>
           </View>
 
+          {/* Sede y Cuatrimestre Institucional UNP */}
+          {(item.sede || item.cuatrimestre) ? (
+            <View style={[styles.campusInfoRow, { backgroundColor: isDarkMode ? '#1E293B' : '#F1F5F9' }]}>
+              <Ionicons name="location" size={14} color={colors.primary} />
+              <Text style={[styles.campusInfoText, { color: colors.textSecondary }]}>
+                {item.sede || 'Sede Pilar'} • {item.cuatrimestre || 'Ciclo 2026'}
+              </Text>
+            </View>
+          ) : null}
+
           {/* Sección de Acceso Gratuito */}
           <View style={[styles.priceContainer, { borderTopColor: isDarkMode ? '#334155' : '#E5E7EB' }]}>
             <Text style={[styles.priceLabel, { color: colors.textSecondary }]}>Acceso:</Text>
@@ -311,8 +321,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     padding: spacing.md,
     borderRadius: borderRadius.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
     gap: 12,
+  },
+  campusInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.md,
+  },
+  campusInfoText: {
+    fontSize: typography.sizes.xs,
+    fontWeight: typography.weights.medium,
   },
   authorAvatar: {
     width: 38,

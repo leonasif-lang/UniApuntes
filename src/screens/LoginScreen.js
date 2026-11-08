@@ -16,12 +16,22 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
+import TermsModal from '../components/TermsModal';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
+import DisclaimerModal from '../components/DisclaimerModal';
+import OnboardingModal from '../components/OnboardingModal';
 
 export default function LoginScreen() {
   const { login, register, loginAsGuest } = useAuth();
 
   // Modo: 'login' | 'register'
   const [activeTab, setActiveTab] = useState('login');
+
+  // Modales interactivos
+  const [showTerms, setShowTerms] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Campos de Login
   const [email, setEmail] = useState('');
@@ -77,11 +87,7 @@ export default function LoginScreen() {
   };
 
   const handleForgotPassword = () => {
-    Alert.alert(
-      'Recuperar Contraseña',
-      'Te enviamos un enlace de recuperación a tu correo institucional registrado.',
-      [{ text: 'Entendido' }]
-    );
+    setShowForgotPassword(true);
   };
 
   const handleDemoLogin = () => {
@@ -117,6 +123,21 @@ export default function LoginScreen() {
               <Ionicons name="ribbon-outline" size={14} color={colors.primaryDark} />
               <Text style={styles.badgeText}>Universidad Nacional del Pilar — 2026</Text>
             </View>
+
+            {/* Banner interactivo de Onboarding / Reseña */}
+            <TouchableOpacity
+              style={styles.onboardingBanner}
+              onPress={() => setShowOnboarding(true)}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Conocer qué es UniApuntes"
+            >
+              <Ionicons name="sparkles" size={15} color={colors.primary} />
+              <Text style={styles.onboardingBannerText}>
+                ¿Primera vez acá? Tocá para ver cómo funciona
+              </Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+            </TouchableOpacity>
           </View>
 
           {/* Tarjeta de Formulario */}
@@ -323,6 +344,18 @@ export default function LoginScreen() {
                   <Text style={styles.primaryButtonText}>CREAR CUENTA</Text>
                   <Ionicons name="checkmark" size={18} color={colors.white} />
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setShowTerms(true)}
+                  style={styles.termsNoticeRow}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="shield-checkmark-outline" size={14} color={colors.primary} />
+                  <Text style={styles.termsNoticeText}>
+                    Al registrarte aceptás los{' '}
+                    <Text style={styles.termsNoticeHighlight}>Términos y Condiciones</Text>
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
 
@@ -353,17 +386,54 @@ export default function LoginScreen() {
                 <Text style={styles.guestButtonText}>Explorar como Invitado</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Botones para consultar Términos, Disclaimer y Ayuda */}
+            <View style={styles.legalLinksRow}>
+              <TouchableOpacity
+                style={styles.legalBtn}
+                onPress={() => setShowTerms(true)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="document-text-outline" size={13} color={colors.primary} />
+                <Text style={styles.legalBtnText}>Términos</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.legalBullet}>•</Text>
+
+              <TouchableOpacity
+                style={styles.legalBtn}
+                onPress={() => setShowDisclaimer(true)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="information-circle-outline" size={13} color={colors.primary} />
+                <Text style={styles.legalBtnText}>Disclaimer / Aviso</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Indicador de Conexión a Backend Cloud */}
+            <View style={styles.backendStatusBadge}>
+              <View style={styles.backendStatusDot} />
+              <Text style={styles.backendStatusText}>
+                Servidor: Cloud Firestore (Firebase) • UNP
+              </Text>
+            </View>
           </View>
 
           {/* Pie de pantalla institucional */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              UniApuntes — Aplicaciones Móviles 2026
+              UniApuntes — Aplicaciones Móviles 2026 • Sede Pilar
             </Text>
-            <Text style={styles.footerSubtext}>Docente: Ariel Bulacio</Text>
+            <Text style={styles.footerSubtext}>Docente: Ariel Bulacio • Universidad Nacional del Pilar</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Modales de la Aplicación */}
+      <TermsModal visible={showTerms} onClose={() => setShowTerms(false)} />
+      <ForgotPasswordModal visible={showForgotPassword} onClose={() => setShowForgotPassword(false)} />
+      <DisclaimerModal visible={showDisclaimer} onClose={() => setShowDisclaimer(false)} />
+      <OnboardingModal visible={showOnboarding} onFinish={() => setShowOnboarding(false)} />
     </SafeAreaView>
   );
 }
@@ -584,6 +654,98 @@ const styles = StyleSheet.create({
   guestButtonText: {
     color: colors.textSecondary,
     fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  },
+  termsNoticeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 8,
+    paddingHorizontal: 4,
+  },
+  termsNoticeText: {
+    fontSize: typography.sizes.xs,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  termsNoticeHighlight: {
+    color: colors.primary,
+    fontWeight: typography.weights.bold,
+    textDecorationLine: 'underline',
+  },
+  termsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: spacing.md,
+    paddingVertical: 8,
+  },
+  termsButtonText: {
+    fontSize: typography.sizes.xs,
+    color: colors.primary,
+    fontWeight: typography.weights.semibold,
+  },
+  onboardingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EEF2FF',
+    borderWidth: 1,
+    borderColor: '#D9E6FF',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: borderRadius.full,
+    marginTop: 12,
+    gap: 6,
+    ...shadows.small,
+  },
+  onboardingBannerText: {
+    fontSize: typography.sizes.xs,
+    color: colors.primary,
+    fontWeight: typography.weights.semibold,
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: spacing.md,
+  },
+  legalBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+  },
+  legalBtnText: {
+    fontSize: typography.sizes.xs,
+    color: colors.primary,
+    fontWeight: typography.weights.semibold,
+  },
+  legalBullet: {
+    fontSize: typography.sizes.xs,
+    color: colors.textSecondary,
+  },
+  backendStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: spacing.sm,
+    paddingVertical: 4,
+  },
+  backendStatusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#10B981',
+  },
+  backendStatusText: {
+    fontSize: 10,
+    color: '#059669',
     fontWeight: typography.weights.medium,
   },
   footer: {

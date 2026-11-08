@@ -10,17 +10,23 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { typography, spacing, borderRadius, shadows } from '../styles/theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../styles/theme';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useTheme } from '../context/ThemeContext';
 import DarkModeButton from '../components/DarkModeButton';
+import TermsModal from '../components/TermsModal';
+import DisclaimerModal from '../components/DisclaimerModal';
+import OnboardingModal from '../components/OnboardingModal';
 
 export default function ProfileScreen({ onBack, onSelectPublication }) {
   const { user, logout } = useAuth();
   const { favorites, favoritesCount } = useFavorites();
   const { colors, isDarkMode } = useTheme();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   const handleLogoutPress = () => {
     setShowLogoutModal(true);
@@ -202,6 +208,91 @@ export default function ProfileScreen({ onBack, onSelectPublication }) {
           <DarkModeButton compact={false} />
         </View>
 
+        {/* Normas Universitarias y Documentación */}
+        <View style={[styles.infoSection, { backgroundColor: colors.cardBg, borderColor: colors.border }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Normas e Información UNP</Text>
+          
+          {/* Términos */}
+          <TouchableOpacity
+            style={styles.termsRow}
+            onPress={() => setShowTermsModal(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.termsRowLeft}>
+              <View style={[styles.termsIconCircle, { backgroundColor: isDarkMode ? '#1E3A8A' : '#EEF2FF' }]}>
+                <Ionicons name="document-text-outline" size={18} color={colors.primary} />
+              </View>
+              <View>
+                <Text style={[styles.termsRowTitle, { color: colors.textPrimary }]}>
+                  Términos y Condiciones
+                </Text>
+                <Text style={[styles.termsRowSubtitle, { color: colors.textSecondary }]}>
+                  Gratuidad, autoría y pautas académicas
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={[styles.innerDivider, { backgroundColor: colors.border }]} />
+
+          {/* Disclaimer */}
+          <TouchableOpacity
+            style={styles.termsRow}
+            onPress={() => setShowDisclaimerModal(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.termsRowLeft}>
+              <View style={[styles.termsIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="information-circle-outline" size={18} color="#D97706" />
+              </View>
+              <View>
+                <Text style={[styles.termsRowTitle, { color: colors.textPrimary }]}>
+                  Aviso Académico (Disclaimer)
+                </Text>
+                <Text style={[styles.termsRowSubtitle, { color: colors.textSecondary }]}>
+                  Proyecto de cátedra • No reemplaza SIU Guaraní
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={[styles.innerDivider, { backgroundColor: colors.border }]} />
+
+          {/* Onboarding */}
+          <TouchableOpacity
+            style={styles.termsRow}
+            onPress={() => setShowOnboardingModal(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.termsRowLeft}>
+              <View style={[styles.termsIconCircle, { backgroundColor: isDarkMode ? '#1E293B' : '#F3E8FF' }]}>
+                <Ionicons name="sparkles" size={18} color="#8B5CF6" />
+              </View>
+              <View>
+                <Text style={[styles.termsRowTitle, { color: colors.textPrimary }]}>
+                  Ver Guía de Bienvenida
+                </Text>
+                <Text style={[styles.termsRowSubtitle, { color: colors.textSecondary }]}>
+                  Repasar qué es y cómo usar UniApuntes
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={[styles.innerDivider, { backgroundColor: colors.border }]} />
+
+          {/* Backend Info */}
+          <View style={styles.backendRow}>
+            <View style={styles.backendDot} />
+            <Text style={[styles.backendLabel, { color: colors.textSecondary }]}>
+              Backend: Google Firebase (Cloud Firestore & Auth) Activo
+            </Text>
+          </View>
+        </View>
+
         {/* Botón de Cierre de Sesión */}
         <TouchableOpacity
           style={styles.logoutButton}
@@ -251,6 +342,11 @@ export default function ProfileScreen({ onBack, onSelectPublication }) {
           </View>
         </View>
       </Modal>
+
+      {/* Modales Informativos y de Normativa */}
+      <TermsModal visible={showTermsModal} onClose={() => setShowTermsModal(false)} />
+      <DisclaimerModal visible={showDisclaimerModal} onClose={() => setShowDisclaimerModal(false)} />
+      <OnboardingModal visible={showOnboardingModal} onFinish={() => setShowOnboardingModal(false)} />
     </SafeAreaView>
   );
 }
@@ -574,5 +670,53 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: typography.weights.bold,
     fontSize: typography.sizes.sm,
+  },
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  termsRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  termsIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  termsRowTitle: {
+    fontSize: typography.sizes.sm,
+    fontWeight: typography.weights.semibold,
+  },
+  termsRowSubtitle: {
+    fontSize: typography.sizes.xs,
+    marginTop: 2,
+  },
+  innerDivider: {
+    height: 1,
+    marginVertical: 4,
+  },
+  backendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  backendDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#10B981',
+  },
+  backendLabel: {
+    fontSize: 10,
+    fontWeight: typography.weights.medium,
   },
 });
