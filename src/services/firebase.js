@@ -14,6 +14,8 @@ import {
 } from 'firebase/firestore';
 import { 
   getAuth, 
+  initializeAuth,
+  getReactNativePersistence,
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
@@ -21,6 +23,8 @@ import {
   updateProfile,
   sendPasswordResetEmail
 } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { 
   getStorage, 
   ref as storageRef, 
@@ -45,8 +49,19 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 // Servicio de Base de Datos Cloud Firestore
 const db = getFirestore(app);
 
-// Servicio de Autenticación
-const auth = getAuth(app);
+// Servicio de Autenticación con persistencia segura (AsyncStorage para móvil / LocalStorage para Web)
+let auth;
+try {
+  if (Platform.OS === 'web') {
+    auth = getAuth(app);
+  } else {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  }
+} catch (e) {
+  auth = getAuth(app);
+}
 
 // Servicio de Almacenamiento Cloud Storage
 const storage = getStorage(app);

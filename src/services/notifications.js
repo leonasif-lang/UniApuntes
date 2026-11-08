@@ -1,19 +1,29 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-// Configuración de comportamiento cuando la app está abierta (foreground)
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Configuración de comportamiento cuando la app está abierta (foreground en móvil)
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+}
 
 /**
  * Solicita permisos y registra el canal de notificaciones en Android
  */
 export async function registerForPushNotificationsAsync() {
+  if (Platform.OS === 'web') {
+    return {
+      granted: true,
+      token: 'web-push-token-local',
+      message: 'Notificaciones simuladas activas en entorno web.',
+    };
+  }
+
   let token = null;
 
   try {
@@ -43,12 +53,11 @@ export async function registerForPushNotificationsAsync() {
       };
     }
 
-    // Intentar obtener el token de Expo Push
+    // Intentar obtener el token local o de Expo Push
     try {
       const tokenData = await Notifications.getExpoPushTokenAsync();
       token = tokenData.data;
     } catch (e) {
-      // Si no hay projectId en app.json en entorno de desarrollo local, se genera un identificador local
       token = `ExponentPushToken[local_${Platform.OS}_${Date.now().toString(36)}]`;
     }
 
@@ -58,7 +67,6 @@ export async function registerForPushNotificationsAsync() {
       message: 'Notificaciones push activadas correctamente.',
     };
   } catch (error) {
-    console.warn('Aviso en registro de notificaciones:', error?.message || error);
     return {
       granted: false,
       token: null,
@@ -68,10 +76,19 @@ export async function registerForPushNotificationsAsync() {
 }
 
 /**
- * Dispara una notificación push en el dispositivo
+ * Dispara una notificación en el dispositivo
  */
 export async function sendLocalNotification({ title, body, data = {} }) {
   try {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        if (Notification.permission === 'granted') {
+          new Notification(title, { body });
+        }
+      }
+      return { success: true };
+    }
+
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: title || '🔔 UniApuntes',
@@ -79,11 +96,10 @@ export async function sendLocalNotification({ title, body, data = {} }) {
         data,
         sound: 'default',
       },
-      trigger: null, // Disparo inmediato
+      trigger: null, // Disparo inmediato en el dispositivo
     });
     return { success: true, notificationId: id };
   } catch (error) {
-    console.warn('Error al disparar notificación push:', error?.message || error);
     return { success: false, error: error?.message };
   }
 }

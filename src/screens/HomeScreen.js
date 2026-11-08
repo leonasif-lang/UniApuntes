@@ -9,6 +9,7 @@ import {
   StatusBar,
   Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { typography, spacing, borderRadius, shadows } from '../styles/theme';
 import SearchBar from '../components/SearchBar';
 import CategoryCard from '../components/CategoryCard';
