@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,23 +23,54 @@ export default function ResultsScreen({ query = 'Programación', onBack, onNavig
   const [currentQuery, setCurrentQuery] = useState(query || 'Programación');
   const [activeFilter, setActiveFilter] = useState(null);
 
-  // Filtrado de publicaciones según término de búsqueda
-  const results = useMemo(() => {
-    const q = (currentQuery || '').toLowerCase().trim();
-    if (!q) {
-      return publications;
+  // Sincronizar término de búsqueda si cambia la navegación externa
+  useEffect(() => {
+    if (query !== undefined) {
+      setCurrentQuery(query);
     }
-    const filtered = publications.filter((p) => {
-      return (
-        p.titulo.toLowerCase().includes(q) ||
-        p.materia.toLowerCase().includes(q) ||
-        p.tipo.toLowerCase().includes(q) ||
-        p.autor.toLowerCase().includes(q)
+  }, [query]);
+
+  // Filtrado resiliente de publicaciones según término de búsqueda
+  const results = useMemo(() => {
+    const list = Array.isArray(publications) ? publications : [];
+    const q = String(currentQuery || '').toLowerCase().trim();
+
+    let filtered = list;
+
+    if (q) {
+      filtered = filtered.filter((p) => {
+        if (!p) return false;
+        const titulo = String(p.titulo || '').toLowerCase();
+        const materia = String(p.materia || '').toLowerCase();
+        const tipo = String(p.tipo || '').toLowerCase();
+        const autor = String(p.autor || '').toLowerCase();
+        const descripcion = String(p.descripcion || '').toLowerCase();
+        return (
+          titulo.includes(q) ||
+          materia.includes(q) ||
+          tipo.includes(q) ||
+          autor.includes(q) ||
+          descripcion.includes(q)
+        );
+      });
+    }
+
+    if (activeFilter === 'Materia') {
+      filtered = [...filtered].sort((a, b) =>
+        String(a.materia || '').localeCompare(String(b.materia || ''))
       );
-    });
-    // Si no encuentra nada, mantenemos al menos los resultados de la materia o lista general para mejor UX
-    return filtered.length > 0 ? filtered : publications;
-  }, [currentQuery]);
+    } else if (activeFilter === 'Tipo') {
+      filtered = [...filtered].sort((a, b) =>
+        String(a.tipo || '').localeCompare(String(b.tipo || ''))
+      );
+    } else if (activeFilter === 'Acceso Libre') {
+      filtered = filtered.filter(
+        (p) => String(p.precio || 'GRATIS').toUpperCase() === 'GRATIS'
+      );
+    }
+
+    return filtered;
+  }, [currentQuery, publications, activeFilter]);
 
   const handleSearch = (newQuery) => {
     setCurrentQuery(newQuery);
@@ -127,13 +158,25 @@ export default function ResultsScreen({ query = 'Programación', onBack, onNavig
 
         {/* Lista de Resultados */}
         <View style={styles.resultsList}>
-          {results.map((publication) => (
-            <PublicationCard
-              key={publication.id}
-              publication={publication}
-              onPress={() => handleSelectPublication(publication)}
-            />
-          ))}
+          {results.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="search-outline" size={44} color={colors.textSecondary} />
+              <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
+                No se encontraron apuntes
+              </Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+                No encontramos publicaciones para "{currentQuery}". Probá con otro término o seleccioná una de las materias sugeridas.
+              </Text>
+            </View>
+          ) : (
+            results.map((publication) => (
+              <PublicationCard
+                key={publication.id}
+                publication={publication}
+                onPress={() => handleSelectPublication(publication)}
+              />
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -205,5 +248,22 @@ const styles = StyleSheet.create({
   },
   resultsList: {
     marginTop: spacing.xs,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  emptyTitle: {
+    fontSize: typography.sizes.md,
+    fontWeight: typography.weights.bold,
+    marginTop: 8,
+  },
+  emptySubtitle: {
+    fontSize: typography.sizes.sm,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

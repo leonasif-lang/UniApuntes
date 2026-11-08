@@ -17,14 +17,15 @@ export default function MessagesScreen({ onOpenChat }) {
   const { conversations } = useMessages();
   const [filterText, setFilterText] = useState('');
 
-  const filteredConversations = conversations.filter((c) => {
-    const q = filterText.toLowerCase().trim();
+  const filteredConversations = (conversations || []).filter((c) => {
+    if (!c) return false;
+    const q = String(filterText || '').toLowerCase().trim();
     if (!q) return true;
     return (
-      c.authorName.toLowerCase().includes(q) ||
-      c.resourceTitle.toLowerCase().includes(q) ||
-      c.resourceSubject.toLowerCase().includes(q) ||
-      c.lastMessage.toLowerCase().includes(q)
+      String(c.authorName || '').toLowerCase().includes(q) ||
+      String(c.resourceTitle || '').toLowerCase().includes(q) ||
+      String(c.resourceSubject || '').toLowerCase().includes(q) ||
+      String(c.lastMessage || '').toLowerCase().includes(q)
     );
   });
 
