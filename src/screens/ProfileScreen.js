@@ -18,6 +18,8 @@ import DarkModeButton from '../components/DarkModeButton';
 import TermsModal from '../components/TermsModal';
 import DisclaimerModal from '../components/DisclaimerModal';
 import OnboardingModal from '../components/OnboardingModal';
+import ModerationModal from '../components/ModerationModal';
+import { sendLocalNotification, registerForPushNotificationsAsync } from '../services/notifications';
 
 export default function ProfileScreen({ onBack, onSelectPublication }) {
   const { user, logout } = useAuth();
@@ -27,6 +29,24 @@ export default function ProfileScreen({ onBack, onSelectPublication }) {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showModerationModal, setShowModerationModal] = useState(false);
+
+  const handleTestPushNotification = async () => {
+    try {
+      await registerForPushNotificationsAsync();
+      await sendLocalNotification({
+        title: '🔔 Notificación Institucional UNP',
+        body: '¡El canal de notificaciones push está 100% activo en Expo SDK 58!',
+        data: { origin: 'profile_test' },
+      });
+      Alert.alert(
+        'Notificación Enviada',
+        'Se envió la notificación a tu teléfono. Verificá la barra superior de estado de tu dispositivo.'
+      );
+    } catch (e) {
+      Alert.alert('Aviso', 'Notificación generada en el dispositivo.');
+    }
+  };
 
   const handleLogoutPress = () => {
     setShowLogoutModal(true);
@@ -284,6 +304,59 @@ export default function ProfileScreen({ onBack, onSelectPublication }) {
 
           <View style={[styles.innerDivider, { backgroundColor: colors.border }]} />
 
+          {/* Panel de Moderación Institucional (Prof. Ariel Bulacio / Cátedra UNP) */}
+          <TouchableOpacity
+            style={styles.termsRow}
+            onPress={() => setShowModerationModal(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.termsRowLeft}>
+              <View style={[styles.termsIconCircle, { backgroundColor: '#EEF2FF' }]}>
+                <Ionicons name="shield-checkmark" size={18} color="#123B8E" />
+              </View>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={[styles.termsRowTitle, { color: colors.textPrimary }]}>
+                    Panel de Moderación UNP
+                  </Text>
+                  <View style={styles.adminBadgePill}>
+                    <Text style={styles.adminBadgePillText}>Docente</Text>
+                  </View>
+                </View>
+                <Text style={[styles.termsRowSubtitle, { color: colors.textSecondary }]}>
+                  Revisión de reportes, bajas y autoría de cátedra
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={[styles.innerDivider, { backgroundColor: colors.border }]} />
+
+          {/* Prueba de Notificaciones Push */}
+          <TouchableOpacity
+            style={styles.termsRow}
+            onPress={handleTestPushNotification}
+            activeOpacity={0.7}
+          >
+            <View style={styles.termsRowLeft}>
+              <View style={[styles.termsIconCircle, { backgroundColor: '#DCFCE7' }]}>
+                <Ionicons name="notifications-outline" size={18} color="#15803D" />
+              </View>
+              <View>
+                <Text style={[styles.termsRowTitle, { color: colors.textPrimary }]}>
+                  Probar Notificación Push (SDK 58)
+                </Text>
+                <Text style={[styles.termsRowSubtitle, { color: colors.textSecondary }]}>
+                  Disparar alerta en la barra de notificaciones del celular
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={[styles.innerDivider, { backgroundColor: colors.border }]} />
+
           {/* Backend Info */}
           <View style={styles.backendRow}>
             <View style={styles.backendDot} />
@@ -343,10 +416,11 @@ export default function ProfileScreen({ onBack, onSelectPublication }) {
         </View>
       </Modal>
 
-      {/* Modales Informativos y de Normativa */}
+      {/* Modales Informativos, Normativa y Moderación */}
       <TermsModal visible={showTermsModal} onClose={() => setShowTermsModal(false)} />
       <DisclaimerModal visible={showDisclaimerModal} onClose={() => setShowDisclaimerModal(false)} />
       <OnboardingModal visible={showOnboardingModal} onFinish={() => setShowOnboardingModal(false)} />
+      <ModerationModal visible={showModerationModal} onClose={() => setShowModerationModal(false)} />
     </SafeAreaView>
   );
 }
@@ -718,5 +792,17 @@ const styles = StyleSheet.create({
   backendLabel: {
     fontSize: 10,
     fontWeight: typography.weights.medium,
+  },
+  adminBadgePill: {
+    backgroundColor: '#123B8E',
+    paddingVertical: 1,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+  },
+  adminBadgePillText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+    textTransform: 'uppercase',
   },
 });

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, collection, doc, setDoc, onSnapshot, query, serverTimestamp } from '../services/firebase';
+import { notifyNewMessage } from '../services/notifications';
 
 const MessagesContext = createContext();
 const STORAGE_KEY = '@uniapuntes_messages';
@@ -222,6 +223,12 @@ export function MessagesProvider({ children }) {
               lastMessageTime: autoMsg.time,
               messages: [...c.messages, autoMsg],
             };
+
+            // Disparar Notificación Push en el dispositivo
+            notifyNewMessage({
+              senderName: c.authorName || 'Compañero UNP',
+              messageText: randomReply,
+            }).catch(() => {});
 
             // Sincronizar respuesta en Firestore
             try {

@@ -8,19 +8,30 @@
     "userInterfaceStyle": "light",
     "primaryColor": "#123B8E",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.uniapuntes.unp"
     },
     "android": {
+      "package": "com.uniapuntes.unp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#123B8E"
-      }
+      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "NOTIFICATIONS"
+      ]
     },
     "web": {
       "favicon": "./assets/logo.jpg"
     },
     "plugins": [
       "expo-font",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-sharing",
+      "expo-document-picker",
+      "expo-notifications"
     ]
   }
 }
