@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas de acceso para UniApuntes (Entorno Académico UNP)
+    // Permite lectura y escritura abierta para desarrollo, cátedra y demostración
+
+    match /publicaciones/{document=**} {
+      allow read, write: if true;
+    }
+
+    match /conversaciones/{document=**} {
+      allow read, write: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
